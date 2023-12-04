@@ -15,7 +15,7 @@ def stem_negative_zero(scale, white_space, zero_fill):
 	and leaves are negative values
 	'''
 	if scale < .1:
-		line = " " * (white_space - 2) + "-0." + "0" * (zero_fill - 1) + "|"
+		line = " " * (white_space - 1) + "-0." + "0" * (zero_fill - 1) + "|"
 	elif scale == .1:
 		line = " " * (white_space - 2) + "-0.|"
 	else:
@@ -28,7 +28,7 @@ def stem_positive_zero(scale, white_space, zero_fill):
 	and leaves are positive values
 	'''
 	if scale < .1:
-		line = " " * (white_space - 1) + "0." + "0" * (zero_fill - 1) + "|"
+		line = " " * (white_space) + "0." + "0" * (zero_fill - 1) + "|"
 	elif scale == .1:
 		line = " " * (white_space - 1) + "0.|"
 	else:
@@ -39,15 +39,39 @@ def stem_nonzero(scale, i, white_space, zero_fill):
 	'''
 	Handles correct padding when stem is non-zero
 	'''
+
+	# trickiest case scaling by 0.01 or lower
 	if scale < .1:
-		if i < 0:
-			line = " " * (white_space - 2) + f"{round(i * 10 * scale, zero_fill):<0{zero_fill + 2}}|"
+
+		# get stem value rounded to the right decimal precision
+		scaled_stem = round(i * 10 * scale, zero_fill)
+
+		if scaled_stem < 0:
+			if scaled_stem >= -100 and scaled_stem <= -10:
+				line = " " * (white_space - 2) + f"{scaled_stem:<0{zero_fill + 3}}|"
+
+			elif scaled_stem >= -100:
+				line = " " * (white_space - 1) + f"{scaled_stem:<0{zero_fill + 1}}|"
+
+			else:
+				line = " " * (white_space - 3) + f"{scaled_stem:<0{zero_fill + 2}}|"
+
 		else:
-			line = " " * (white_space - 1) + f"{round(i * 10 * scale, zero_fill):<0{zero_fill + 1}}|"
+			if scaled_stem < 100 and scaled_stem >= 10:
+				line = " " * (white_space - 1) + f"{scaled_stem:<0{zero_fill + 2}}|"
+
+			elif scaled_stem < 100:
+				line = " " * (white_space) + f"{scaled_stem:<0{zero_fill + 1}}|"
+
+			else:
+				line = " " * (white_space - 2) + f"{scaled_stem:<0{zero_fill + 3}}|"
+
 	elif scale == .1:
 		line = f"{i:>{white_space}}.|"
+
 	else:
 		line = f"{i:>{white_space}}|"
+
 	return line
 
 def leaf_negative_zero(dataset, stem_plot, scale, step, white_space, zero_fill):
@@ -196,6 +220,16 @@ def leaf_nonzero(dataset, stem_plot, scale, step, i, white_space, zero_fill):
 
 	return stem_plot
 
+def truncate_white_space(stem_plot):
+	'''
+	If unnecessary white space has been added, truncate excess
+	'''
+	excess = min([len(i) - len(i.lstrip()) for i in stem_plot[1:]])
+
+	if excess > 0:
+		stem_plot[1:] = [i[excess:] for i in stem_plot[1:]]
+
+	return stem_plot
 
 def stem_plot(dataset,scale,step=1,low=None,hi=None,label=None):
 	'''
@@ -224,13 +258,15 @@ def stem_plot(dataset,scale,step=1,low=None,hi=None,label=None):
 	min_value = min(dataset)
 	max_value = max(dataset)
 
-	# f value used to justify formated string
-	if min_value <= -10 or max_value >= 100:
-		f = 3
+	# white_space value used to justify formated string
+	if min_value <= -100 or max_value >= 1000:
+		white_space = 4
+	elif min_value <= -10 or max_value >= 100:
+		white_space = 3
 	elif min_value < 0 or max_value >= 10:
-		f = 2
+		white_space = 2
 	else:
-		f = 1
+		white_space = 1
 
 	# value used to justify stem with correct number of zeros
 	zero_fill = int(-math.log10(scale))
@@ -249,13 +285,16 @@ def stem_plot(dataset,scale,step=1,low=None,hi=None,label=None):
 
 			if low < 0:
 				# if least stem value if negative
-				stem_plot = leaf_negative_zero(dataset,stem_plot,scale,step,f, zero_fill)
+				stem_plot = leaf_negative_zero(dataset, stem_plot, scale,step, white_space, zero_fill)
 			else:
 				# if all stem values are positive
-				stem_plot = leaf_positive_zero(dataset,stem_plot,scale,step,f, zero_fill)
+				stem_plot = leaf_positive_zero(dataset, stem_plot, scale,step, white_space, zero_fill)
 		else:
 			# all other cases where stem is non-zero
-			stem_plot = leaf_nonzero(dataset,stem_plot,scale,step,i,f, zero_fill)
+			stem_plot = leaf_nonzero(dataset, stem_plot, scale,step, i, white_space, zero_fill)
+
+	# stem function may be overly cautious on adding whitespace
+	stem_plot = truncate_white_space(stem_plot)
 
 	return stem_plot
 
