@@ -16,7 +16,7 @@ distributions = {
 		'sample': np.random.exponential(scale=1.0, size=500),
 		'scale': 0.1,
 		'step': 4,
-		'font': 'banner3-D'
+		'font': 'jazmine'
 	},
 	'Lognormal': {
 		'sample': np.random.lognormal(mean=0, sigma=1.0, size=500),
@@ -34,7 +34,7 @@ distributions = {
 		'sample': np.random.beta(a=0.5, b=0.5, size=500),
 		'scale': 0.01,
 		'step': 2,
-		'font': 'computer'
+		'font': 'fender'
 	}
 }
 
