@@ -10,7 +10,7 @@ distributions = {
 		'sample': np.random.normal(size=1500, loc=100, scale=15),
 		'scale': 1,
 		'step': 5,
-		'font': 'big'
+		'font': 'banner4'
 	},
 	'Exponential': {
 		'sample': np.random.exponential(scale=1.0, size=1000),
@@ -18,12 +18,7 @@ distributions = {
 		'step': 1,
 		'font': 'jazmine'
 	},
-	'Lognormal': {
-		'sample': np.random.lognormal(mean=0, sigma=1.0, size=1500),
-		'scale': 0.01,
-		'step': 1,
-		'font': 'epic'
-	},
+
 	'Gamma': {
 		'sample': np.random.gamma(shape=5.0, scale=1.0, size=1500),
 		'scale': 0.1,
@@ -35,6 +30,12 @@ distributions = {
 		'scale': 0.01,
 		'step': 5,
 		'font': 'fender'
+	},
+		'Lognormal': {
+		'sample': np.random.lognormal(mean=0, sigma=1.0, size=1500),
+		'scale': 0.01,
+		'step': 1,
+		'font': 'epic'
 	}
 }
 
